@@ -28,6 +28,7 @@ unsigned LoopMeshBuilder::marchCubes(const ParametricScalarField &field)
     unsigned totalTriangles = 0;
 
     // 2. Loop over each coordinate in the 3D grid.
+    #pragma omp reduction(+:totalTriangles)
     for(size_t i = 0; i < totalCubesCount; ++i)
     {
         // 3. Compute 3D position in the grid.
@@ -66,7 +67,10 @@ float LoopMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
 
         // Comparing squares instead of real distance to avoid unnecessary
         // "sqrt"s in the loop.
-        value = std::min(value, distanceSquared);
+        #pragma omp critical
+        {
+            value = std::min(value, distanceSquared);
+        }
     }
 
     // 3. Finally take square root of the minimal square distance to get the real distance
