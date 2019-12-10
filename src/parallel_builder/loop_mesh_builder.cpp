@@ -28,7 +28,7 @@ unsigned LoopMeshBuilder::marchCubes(const ParametricScalarField &field)
     unsigned totalTriangles = 0;
 
     // 2. Loop over each coordinate in the 3D grid.
-    #pragma omp simd reduction(+:totalTriangles)
+    #pragma omp parallel for reduction(+:totalTriangles)
     for(size_t i = 0; i < totalCubesCount; ++i)
     {
         // 3. Compute 3D position in the grid.
@@ -58,7 +58,6 @@ float LoopMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
 
     // 2. Find minimum square distance from points "pos" to any point in the
     //    field.
-    #pragma omp parallel for shared(value)
     for(unsigned i = 0; i < count; ++i)
     {
         float distanceSquared  = (pos.x - pPoints[i].x) * (pos.x - pPoints[i].x);
@@ -67,10 +66,7 @@ float LoopMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
 
         // Comparing squares instead of real distance to avoid unnecessary
         // "sqrt"s in the loop.
-        #pragma omp critical
-        {
-            value = std::min(value, distanceSquared);
-        }
+        value = std::min(value, distanceSquared);
     }
 
     // 3. Finally take square root of the minimal square distance to get the real distance
@@ -84,5 +80,8 @@ void LoopMeshBuilder::emitTriangle(const BaseMeshBuilder::Triangle_t &triangle)
     // Store generated triangle into vector (array) of generated triangles.
     // The pointer to data in this array is return by "getTrianglesArray(...)" call
     // after "marchCubes(...)" call ends.
-    mTriangles.push_back(triangle);
+    #pragma omp critical
+    {
+        mTriangles.push_back(triangle);
+    }
 }
