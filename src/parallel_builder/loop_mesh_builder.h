@@ -1,11 +1,11 @@
 /**
  * @file    loop_mesh_builder.h
  *
- * @author  FULL NAME <xlogin00@stud.fit.vutbr.cz>
+ * @author  Tomas Willaschek <xwilla00@stud.fit.vutbr.cz>
  *
  * @brief   Parallel Marching Cubes implementation using OpenMP loops
  *
- * @date    DATE
+ * @date    10/12/2019
  **/
 
 #ifndef LOOP_MESH_BUILDER_H

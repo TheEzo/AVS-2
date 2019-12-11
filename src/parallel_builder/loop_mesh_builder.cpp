@@ -5,7 +5,7 @@
  *
  * @brief   Parallel Marching Cubes implementation using OpenMP loops
  *
- * @date    DATE
+ * @date    10/12/2019
  **/
 
 #include <iostream>
@@ -29,7 +29,7 @@ unsigned LoopMeshBuilder::marchCubes(const ParametricScalarField &field)
 
     // 2. Loop over each coordinate in the 3D grid.
     // todo static, dynamic, guided vypadaji stejne, auto je pomalsi o sekundu
-    #pragma omp parallel for reduction(+:totalTriangles) schedule(guided,8)
+    #pragma omp parallel for reduction(+:totalTriangles) schedule(guided, 8)
     for(size_t i = 0; i < totalCubesCount; ++i)
     {
         // 3. Compute 3D position in the grid.
@@ -59,7 +59,6 @@ float LoopMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
 
     // 2. Find minimum square distance from points "pos" to any point in the
     //    field.
-//    #pragma omp parallel for reduction(min:value)
     for(unsigned i = 0; i < count; ++i)
     {
         float distanceSquared  = (pos.x - pPoints[i].x) * (pos.x - pPoints[i].x);

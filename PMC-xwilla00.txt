@@ -12,6 +12,7 @@ Login: xlogin00
    Jaký vliv má velikost "chunk" při dynamickém plánování (8, 16, 32, 64)?
 
 3) Jakým způsobem zajišťujete ukládání trojúhelníků z několika vláken současně?
+    - Kritickou sekcí
 
 Úloha 2: Paralelní průchod stromem
 ===============================================================================
