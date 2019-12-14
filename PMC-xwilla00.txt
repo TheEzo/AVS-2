@@ -37,11 +37,11 @@ Login: xwilla00
 
 	- tasky vytváří vždy jedno vlákno master/single
 	- každá z 8 nových kostek octree je zpracována novým taskem
-	- každý task zapisuje do definované sdílené proměnné, které jsou na konci sečteny
 
 2) Jakým způsobem jste realizovali sesbírání celkového počtu trojúhelníků?
 
-	kritickou sekcí, stejně jako v loop řešení
+	každý task zapisuje do definované proměnné, která je specifická pro task,
+	tyto proměnné jsou na konci sečteny
 
 3) Jaký vliv má na vaše řešení tzv. "cut-off"? Je vhodné vytvářet nový
    task pro každou krychli na nejnižší úrovni?
@@ -61,8 +61,17 @@ Login: xwilla00
 
 1) Stručně zhodnoťte efektivitu vytvořených řešení (na základě grafů škálování).
 
-2) V jakém případě (v závislosti na počtu bodů ve vstupním souboru a velikosti 
+	řešení je zřejmě efektivní, protože zpracování bodů v čase roste lineárně
+	s jejich počtem
+
+2) V jakém případě (v závislosti na počtu bodů ve vstupním souboru a velikosti
    mřížky) bude vaše řešení 1. úlohy neefektivní? (pokud takový případ existuje)
 
-3) Je (nebo není) stromový algoritmus efektivnější z pohledu slabého škálování 
+   - pokud je na vstupu více než 2^12 bodů, klesá efektivita smyčky, ale stoupá
+     efektivita stromového provední
+   - při 2^18 vstupnícho bodů začíná i neůměrně stoupat čas
+
+3) Je (nebo není) stromový algoritmus efektivnější z pohledu slabého škálování
    vzhledem ke vstupu?
+
+   není, protože časy, ve kterých jednotlivá vlákna vykonávají danou úlohu rostou
