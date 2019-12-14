@@ -28,26 +28,9 @@ unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
     // code and only when that works add OpenMP tasks to achieve parallelism.
 
     // 1. Compute total number of cubes in the grid.
-    // todo delit na 8 podle mGridSize/2
-    // todo spocitat povrch krychle > mIsoLevel+sqrt(3)/2*mGridSize
-    size_t totalCubesCount = mGridSize*mGridSize*mGridSize;
+    Vec3_t<float> start_pos(0, 0, 0);
+    unsigned totalTriangles = count(field, mGridSize, start_pos);
 
-    unsigned totalTriangles = count(field, mGridSize); //todo offset?
-
-//    // 2. Loop over each coordinate in the 3D grid.
-//    for(size_t i = 0; i < totalCubesCount; ++i)
-//    {
-//        // 3. Compute 3D position in the grid.
-//        Vec3_t<float> cubeOffset( i % mGridSize,
-//                                  (i / mGridSize) % mGridSize,
-//                                  i / (mGridSize*mGridSize));
-//
-//        // 4. Evaluate "Marching Cube" at given position in the grid and
-//        //    store the number of triangles generated.
-//        totalTriangles += buildCube(cubeOffset, field);
-//    }
-
-    // 5. Return total number of triangles generated.
     return totalTriangles;
 }
 
@@ -71,10 +54,79 @@ float TreeMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
 
 void TreeMeshBuilder::emitTriangle(const BaseMeshBuilder::Triangle_t &triangle)
 {
+        mTriangles.push_back(triangle);
+}
+
+unsigned TreeMeshBuilder::count(const ParametricScalarField &field, size_t side_len, const Vec3_t<float> start_pos) {
+    if(side_len == 1){
+        return buildCube(start_pos, field);
+    }
+    else{
+        size_t side = side_len/2; // a-1; a
+        CubeCornerVerts_t cubeCorners;
+        Vec3_t<float> to_count(side, side, side);
+        transformCubeVertices(to_count, sc_vertexNormPos, cubeCorners);
+        if(!continueCount(cubeCorners[0], field, side))
+            return 0;
+
+        unsigned total_triangles = 0;
+        {
+            Vec3_t<float> start(start_pos.x, start_pos.y, start_pos.z);
+            total_triangles += count(field, side, start);
+        }
+
+        {
+            Vec3_t<float> start(start_pos.x + side, start_pos.y, start_pos.z);
+            total_triangles += count(field, side, start);
+        }
+
+        {
+            Vec3_t<float> start(start_pos.x, start_pos.y + side, start_pos.z);
+            total_triangles += count(field, side, start);
+        }
+
+        {
+            Vec3_t<float> start(start_pos.x, start_pos.y, start_pos.z + side);
+            total_triangles += count(field, side, start);
+        }
+
+        {
+            Vec3_t<float> start(start_pos.x + side, start_pos.y + side, start_pos.z);
+            total_triangles += count(field, side, start);
+        }
+
+        {
+            Vec3_t<float> start(start_pos.x, start_pos.y + side, start_pos.z + side);
+            total_triangles += count(field, side, start);
+        }
+
+        {
+            Vec3_t<float> start(start_pos.x + side, start_pos.y, start_pos.z + side);
+            total_triangles += count(field, side, start);
+        }
+
+        {
+            Vec3_t<float> start(start_pos.x + side, start_pos.y + side, start_pos.z + side);
+            total_triangles += count(field, side, start);
+        }
+        return total_triangles;
+    }
 
 }
 
-unsigned TreeMeshBuilder::count(const ParametricScalarField &field, size_t side_len) {
+bool TreeMeshBuilder::continueCount(const Vec3_t<float> pos, const ParametricScalarField &field, size_t side){
+    const Vec3_t<float> *pPoints = field.getPoints().data();
+    const unsigned count = unsigned(field.getPoints().size());
 
-    return 0;
+    float value = std::numeric_limits<float>::max();
+
+    for(unsigned i = 0; i < count; ++i)
+    {
+        float distanceSquared  = (pos.x - pPoints[i].x) * (pos.x - pPoints[i].x);
+        distanceSquared       += (pos.y - pPoints[i].y) * (pos.y - pPoints[i].y);
+        distanceSquared       += (pos.z - pPoints[i].z) * (pos.z - pPoints[i].z);
+
+        value = std::min(value, distanceSquared);
+    }
+    return sqrt(value) <= mIsoLevel+sqrt(3)/2*side;
 }
