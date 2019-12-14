@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "openmp-use-default-none"
 /**
  * @file    tree_mesh_builder.cpp
  *
@@ -54,64 +56,79 @@ float TreeMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
 
 void TreeMeshBuilder::emitTriangle(const BaseMeshBuilder::Triangle_t &triangle)
 {
-        mTriangles.push_back(triangle);
+    #pragma omp critical
+    mTriangles.push_back(triangle);
 }
 
 unsigned TreeMeshBuilder::count(const ParametricScalarField &field, size_t side_len, const Vec3_t<float> start_pos) {
     if(side_len == 1){
         return buildCube(start_pos, field);
     }
-    else{
-        size_t side = side_len/2; // a-1; a
+    else {
+        size_t side = side_len / 2; // a-1; a
         CubeCornerVerts_t cubeCorners;
         Vec3_t<float> to_count(side, side, side);
         transformCubeVertices(to_count, sc_vertexNormPos, cubeCorners);
-        if(!continueCount(cubeCorners[0], field, side))
+        if (!continueCount(cubeCorners[0], field, side))
             return 0;
 
-        unsigned total_triangles = 0;
+        unsigned t1 = 0;
+        unsigned t2 = 0;
+        unsigned t3 = 0;
+        unsigned t4 = 0;
+        unsigned t5 = 0;
+        unsigned t6 = 0;
+        unsigned t7 = 0;
+        unsigned t8 = 0;
+        #pragma omp parallel
         {
-            Vec3_t<float> start(start_pos.x, start_pos.y, start_pos.z);
-            total_triangles += count(field, side, start);
+            #pragma omp master
+            {
+                #pragma omp task //private(t1)
+                {
+                    Vec3_t<float> start(start_pos.x, start_pos.y, start_pos.z);
+                    t1 = count(field, side, start);
+                }
+                #pragma omp task //private(t2)
+                {
+                    Vec3_t<float> start(start_pos.x + side, start_pos.y, start_pos.z);
+                    t2 = count(field, side, start);
+                }
+                #pragma omp task //private(t3)
+                {
+                    Vec3_t<float> start(start_pos.x, start_pos.y + side, start_pos.z);
+                    t3 = count(field, side, start);
+                }
+                #pragma omp task //private(t4)
+                {
+                    Vec3_t<float> start(start_pos.x, start_pos.y, start_pos.z + side);
+                    t4 = count(field, side, start);
+                }
+                #pragma omp task //private(t5)
+                {
+                    Vec3_t<float> start(start_pos.x + side, start_pos.y + side, start_pos.z);
+                    t5 = count(field, side, start);
+                }
+                #pragma omp task //private(t6)
+                {
+                    Vec3_t<float> start(start_pos.x, start_pos.y + side, start_pos.z + side);
+                    t6 = count(field, side, start);
+                }
+                #pragma omp task //private(t7)
+                {
+                    Vec3_t<float> start(start_pos.x + side, start_pos.y, start_pos.z + side);
+                    t7 = count(field, side, start);
+                }
+                #pragma omp task //private(t8)
+                {
+                    Vec3_t<float> start(start_pos.x + side, start_pos.y + side, start_pos.z + side);
+                    t8 = count(field, side, start);
+                }
+            }
         }
-
-        {
-            Vec3_t<float> start(start_pos.x + side, start_pos.y, start_pos.z);
-            total_triangles += count(field, side, start);
-        }
-
-        {
-            Vec3_t<float> start(start_pos.x, start_pos.y + side, start_pos.z);
-            total_triangles += count(field, side, start);
-        }
-
-        {
-            Vec3_t<float> start(start_pos.x, start_pos.y, start_pos.z + side);
-            total_triangles += count(field, side, start);
-        }
-
-        {
-            Vec3_t<float> start(start_pos.x + side, start_pos.y + side, start_pos.z);
-            total_triangles += count(field, side, start);
-        }
-
-        {
-            Vec3_t<float> start(start_pos.x, start_pos.y + side, start_pos.z + side);
-            total_triangles += count(field, side, start);
-        }
-
-        {
-            Vec3_t<float> start(start_pos.x + side, start_pos.y, start_pos.z + side);
-            total_triangles += count(field, side, start);
-        }
-
-        {
-            Vec3_t<float> start(start_pos.x + side, start_pos.y + side, start_pos.z + side);
-            total_triangles += count(field, side, start);
-        }
-        return total_triangles;
+        #pragma omp taskwait
+        return t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8;
     }
-
 }
 
 bool TreeMeshBuilder::continueCount(const Vec3_t<float> pos, const ParametricScalarField &field, size_t side){
@@ -130,3 +147,5 @@ bool TreeMeshBuilder::continueCount(const Vec3_t<float> pos, const ParametricSca
     }
     return sqrt(value) <= mIsoLevel+sqrt(3)/2*side;
 }
+
+#pragma clang diagnostic pop

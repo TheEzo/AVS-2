@@ -1,0 +1,3 @@
+/home/tom/AVS-2/src/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/tom/AVS-2/src/cmake-build-debug/CMakeFiles/PMC.dir
+/home/tom/AVS-2/src/cmake-build-debug/CMakeFiles/edit_cache.dir

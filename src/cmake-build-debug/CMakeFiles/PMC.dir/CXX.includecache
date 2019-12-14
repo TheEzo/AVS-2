@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../common/base_mesh_builder.h
+array
+-
+vector_helpers.h
+../common/vector_helpers.h
+parametric_scalar_field.h
+../common/parametric_scalar_field.h
+
+../common/parametric_scalar_field.h
+string
+-
+vector
+-
+vector_helpers.h
+../common/vector_helpers.h
+
+../common/vector_helpers.h
+chrono
+-
+
+/home/tom/AVS-2/src/parallel_builder/tree_mesh_builder.cpp
+iostream
+-
+math.h
+-
+limits
+-
+tree_mesh_builder.h
+/home/tom/AVS-2/src/parallel_builder/tree_mesh_builder.h
+
+/home/tom/AVS-2/src/parallel_builder/tree_mesh_builder.h
+base_mesh_builder.h
+/home/tom/AVS-2/src/parallel_builder/base_mesh_builder.h
+
