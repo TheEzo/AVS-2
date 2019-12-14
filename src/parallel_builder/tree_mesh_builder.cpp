@@ -64,6 +64,25 @@ unsigned TreeMeshBuilder::count(const ParametricScalarField &field, size_t side_
     if(side_len == 1){
         return buildCube(start_pos, field);
     }
+    else if (side_len <= 4){
+        size_t totalCubesCount = side_len*side_len*side_len;
+
+        unsigned totalTriangles = 0;
+        for(size_t i = 0; i < totalCubesCount; ++i)
+        {
+            // 3. Compute 3D position in the grid.
+            Vec3_t<float> cubeOffset( i % side_len + start_pos.x,
+                                      (i / side_len) % side_len + start_pos.y,
+                                      i / (side_len*side_len) + start_pos.z);
+
+            // 4. Evaluate "Marching Cube" at given position in the grid and
+            //    store the number of triangles generated.
+            totalTriangles += buildCube(cubeOffset, field);
+        }
+
+        // 5. Return total number of triangles generated.
+        return totalTriangles;
+    }
     else {
         size_t side = side_len / 2; // a-1; a
         CubeCornerVerts_t cubeCorners;

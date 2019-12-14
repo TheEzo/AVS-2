@@ -1,30 +1,60 @@
 Architektury Výpočetních Systémů (AVS 2019)
 Projekt č. 2 (PMC)
-Login: xlogin00
+Login: xwilla00
 
 Úloha 1: Paralelizace původního řešení
 ===============================================================================
 
-1) Kterou ze smyček (viz zadání) je vhodnější paralelizovat a co způsobuje 
+1) Kterou ze smyček (viz zadání) je vhodnější paralelizovat a co způsobuje
    neefektivitu paralelizaci té druhé?
 
-2) Jaké plánování (rozdělení práce mezi vlákna) jste zvolili a proč? 
+   Smyčku v marchCubes funkci, protože z této smyčky je volána další funkce,
+   která následně spustí funkci evaluateFieldAt. Smyčka ve funkci evaluate
+   FieldAt také neobsahuje moc kódu, tudíž spuštění ve vláknech bere větší
+   režii než při vykonání na jednom vlákně
+
+
+2) Jaké plánování (rozdělení práce mezi vlákna) jste zvolili a proč?
+
+	dynamic, protože počet iterací je násobkem 2
+
    Jaký vliv má velikost "chunk" při dynamickém plánování (8, 16, 32, 64)?
 
+   V tomto projektu minimální, protože smyčka má noho iterací, ale v jiném
+   případě, kdy by cyklus měl měně iterací nebo jiný počet než násobek 2,
+   v posledních cyklech by některé z vlákem mohly státa a nic nedělat
+
+
 3) Jakým způsobem zajišťujete ukládání trojúhelníků z několika vláken současně?
-    - Kritickou sekcí
+
+   Kritickou sekcí
+
 
 Úloha 2: Paralelní průchod stromem
 ===============================================================================
 
 1) Stručně popište použití OpenMP tasků ve vašem řešení.
 
+	- tasky vytváří vždy jedno vlákno master/single
+	- každá z 8 nových kostek octree je zpracována novým taskem
+	- každý task zapisuje do definované sdílené proměnné, které jsou na konci sečteny
+
 2) Jakým způsobem jste realizovali sesbírání celkového počtu trojúhelníků?
 
-3) Jaký vliv má na vaše řešení tzv. "cut-off"? Je vhodné vytvářet nový 
+	kritickou sekcí, stejně jako v loop řešení
+
+3) Jaký vliv má na vaše řešení tzv. "cut-off"? Je vhodné vytvářet nový
    task pro každou krychli na nejnižší úrovni?
 
+   - cut-off hodnota byla testováním zvolena na 4
+   - na bun2 datech bylo zlepšení okolo 1s
+   - není vhodné vytvářet task pro každou krychli na nejnižší úrovni, protože
+     kód k vykonání je příliš krátký, tudíž režie pro vytvoření tasku je větší
+
 4) Jakým způsobem zajišťujete ukládání trojúhelníků z několika vláken současně?
+
+	kritickou sekcí
+
 
 Úloha 2: Grafy škálování obou řešení
 ===============================================================================

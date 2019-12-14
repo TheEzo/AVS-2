@@ -28,8 +28,7 @@ unsigned LoopMeshBuilder::marchCubes(const ParametricScalarField &field)
     unsigned totalTriangles = 0;
 
     // 2. Loop over each coordinate in the 3D grid.
-    // todo static, dynamic, guided vypadaji stejne, auto je pomalsi o sekundu
-    #pragma omp parallel for reduction(+:totalTriangles) schedule(guided, 8)
+    #pragma omp parallel for reduction(+:totalTriangles) schedule(dynamic, 16)
     for(size_t i = 0; i < totalCubesCount; ++i)
     {
         // 3. Compute 3D position in the grid.
